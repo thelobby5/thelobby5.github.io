@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>THE LOBBY</title>
+<title>THE LOBBY 5</title>
 <meta name="theme-color" content="#15103A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="THE LOBBY">
+<meta name="apple-mobile-web-app-title" content="THE LOBBY 5">
 <meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -29,7 +29,7 @@ h2{font-size:34px;font-weight:900;letter-spacing:-.02em;margin:14px 0 16px}
 h3{font-size:20px;font-weight:800;margin-bottom:12px}
 .hero{padding:22px 0 8px}
 .hint{color:var(--dim);font-weight:700}
-h1{font-size:clamp(76px,26vw,120px);line-height:.86;font-weight:900;letter-spacing:-.05em;margin:8px 0 22px;
+h1{font-size:clamp(52px,19vw,96px);line-height:.86;font-weight:900;letter-spacing:-.05em;margin:8px 0 22px;
 color:var(--sun);text-shadow:5px 5px 0 var(--pink)}
 .slots{display:flex;flex-wrap:wrap;gap:10px}
 .slot{padding:10px 16px;border-radius:14px;font-weight:900;color:#15103A;box-shadow:0 4px 0 rgba(0,0,0,.35)}
@@ -117,17 +117,20 @@ html[data-theme=light] .top b,html[data-theme=light] .tabs a.on{color:#15103A}
 .del{background:none;border:0;color:var(--pink);font:inherit;font-weight:800;float:right}
 .ver{color:#15103A}
 html[data-theme=light] .card2 b{color:#C2265C}
+.ln{white-space:nowrap}
+.five{color:var(--pink);text-shadow:5px 5px 0 var(--sun)}
+html[data-theme=light] .five{color:var(--sun);text-shadow:5px 5px 0 var(--pink)}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header class="top"><b>THE LOBBY</b><span class="ver">demo v0.4</span></header>
+<header class="top"><b>THE LOBBY 5</b><span class="ver">demo v0.4.2</span></header>
 <main>
   <section id="inicio" class="view">
     <div class="hero">
       <p class="hint">Sala privada de</p>
-      <h1>THE<br>LOBBY</h1>
+      <h1>THE<br><span class="ln">LOBBY <span class="five">5</span></span></h1>
       <div class="slots" id="slots"></div>
     </div>
     <div class="card2" id="quote"></div>
