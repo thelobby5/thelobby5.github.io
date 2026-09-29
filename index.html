@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>THE LOBBY</title>
+<meta name="theme-color" content="#15103A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="THE LOBBY">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{--bg:#15103A;--surf:#241C63;--surf2:#2F2680;--ink:#FFF7E8;--dim:#B9B0E8;--pink:#FF5C8A;--sun:#FFD23F;--mint:#46E0D0;
+--font:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold","Nunito",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.4;overscroll-behavior:none}
+.top{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;
+padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px;background:rgba(21,16,58,.92);backdrop-filter:blur(10px)}
+.top b{font-weight:900;letter-spacing:.06em;font-size:17px}
+.ver{font-size:12px;color:var(--bg);background:var(--sun);padding:2px 9px;border-radius:99px;font-weight:800}
+main{padding:calc(env(safe-area-inset-top,0px) + 58px) 18px calc(env(safe-area-inset-bottom,0px) + 92px);max-width:560px;margin:auto}
+.view{display:none}.view.on{display:block}
+h2{font-size:34px;font-weight:900;letter-spacing:-.02em;margin:14px 0 16px}
+h3{font-size:20px;font-weight:800;margin-bottom:12px}
+.hero{padding:22px 0 8px}
+.hint{color:var(--dim);font-weight:700}
+h1{font-size:clamp(76px,26vw,120px);line-height:.86;font-weight:900;letter-spacing:-.05em;margin:8px 0 22px;
+color:var(--sun);text-shadow:5px 5px 0 var(--pink)}
+.slots{display:flex;flex-wrap:wrap;gap:10px}
+.slot{padding:10px 16px;border-radius:14px;font-weight:900;color:#15103A;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:30px}
+.grid a{background:var(--surf);border-radius:20px;padding:16px;color:var(--ink);text-decoration:none;font-weight:800;display:flex;flex-direction:column;gap:6px}
+.grid a span{font-size:26px}
+.cards{display:grid;gap:12px}
+.card{display:flex;align-items:center;gap:14px;background:var(--surf);border-radius:22px;padding:16px;border-left:8px solid var(--c)}
+.avatar{width:54px;height:54px;border-radius:50%;background:var(--c);color:#15103A;display:grid;place-items:center;font-size:24px;font-weight:900}
+.card b{font-size:20px;display:block}.card small{color:var(--dim)}
+.empty{text-align:center;padding:44px 20px;background:var(--surf);border-radius:24px;border:2px dashed var(--surf2);color:var(--dim)}
+.empty span{font-size:44px}.empty p{margin-top:8px}
+form.add{display:grid;gap:10px;margin-bottom:18px}
+textarea,select{width:100%;background:var(--surf);color:var(--ink);border:2px solid var(--surf2);border-radius:16px;padding:12px 14px;font:inherit;resize:none}
+textarea:focus,select:focus{outline:3px solid var(--sun);border-color:transparent}
+.btn{background:var(--sun);color:#15103A;border:0;border-radius:16px;padding:14px 22px;font:inherit;font-weight:900;font-size:17px;box-shadow:0 4px 0 #b8940f;cursor:pointer}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b8940f}
+.btn.ghost{background:var(--surf2);color:var(--ink);box-shadow:none}
+.item{background:var(--surf);border-radius:18px;padding:14px 16px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+.item div{flex:1;white-space:pre-wrap;word-break:break-word}.item small{display:block;color:var(--dim);margin-top:4px}
+.item button{background:none;border:0;color:var(--dim);font-size:20px;padding:0 4px}
+.game{background:var(--surf);border-radius:26px;padding:18px;margin-bottom:18px;text-align:center}
+.wheelbox{position:relative;width:min(300px,100%);margin:0 auto 16px}
+.wheelbox canvas{width:100%;height:auto;display:block}
+.pin{position:absolute;top:-8px;left:50%;margin-left:-12px;border:12px solid transparent;border-top:24px solid var(--ink);z-index:2}
+.result{font-size:26px;font-weight:900;margin-top:14px;color:var(--sun)}
+.q{font-size:22px;font-weight:800;margin-bottom:14px}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pick{border:0;border-radius:14px;padding:12px;font:inherit;font-weight:900;color:#15103A;background:var(--c)}
+.pick i{font-style:normal;opacity:.75;margin-left:6px}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;background:rgba(36,28,99,.96);backdrop-filter:blur(10px);
+padding:6px 4px calc(env(safe-area-inset-bottom,0px) + 6px);border-top:2px solid var(--surf2)}
+.tabs a{flex:1;text-align:center;color:var(--dim);text-decoration:none;font-size:10px;font-weight:800;padding:4px 0;border-radius:12px}
+.tabs a span{display:block;font-size:21px}
+.tabs a.on{color:var(--sun);background:var(--surf2)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translate(-50%,20px);background:var(--ink);color:var(--bg);
+padding:10px 18px;border-radius:99px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.card{width:100%;border:0;border-left:8px solid var(--c);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.avatar{background-size:cover;background-position:center;flex:none}
+dialog{border:0;border-radius:26px;background:var(--surf);color:var(--ink);padding:22px;width:min(92vw,420px);margin:auto}
+dialog::backdrop{background:rgba(10,7,30,.75)}
+dialog h3{margin-bottom:14px}
+dialog .avatar{width:96px;height:96px;font-size:40px;margin:0 auto 12px;border-radius:50%}
+dialog input[type=text]{width:100%;background:var(--bg);color:var(--ink);border:2px solid var(--surf2);border-radius:16px;padding:12px 14px;font:inherit;margin:8px 0 14px}
+dialog input[type=file]{display:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.row .btn{flex:1;padding:12px 14px;font-size:15px}
+.lbl{display:block;color:var(--dim);font-weight:700;font-size:14px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gallery button{aspect-ratio:1;border:0;border-radius:12px;background:var(--surf) center/cover;cursor:pointer}
+.gallery .empty{grid-column:1/-1}
+#viewer{text-align:center}
+#viewer img{display:block;max-width:100%;max-height:62vh;margin:0 auto 10px;border-radius:16px}
+#viewer small{display:block;color:var(--dim);margin-bottom:14px}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+a,button,label,.card,.pick{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button,input,select,textarea{-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%;background-size:6px 6px;background-repeat:no-repeat;padding-right:38px}
+dialog:not([open]){display:none}
+dialog.fb{position:fixed;inset:0;margin:auto;height:fit-content;max-height:92vh;overflow:auto;z-index:20;box-shadow:0 0 0 100vmax rgba(10,7,30,.75)}
+@media (max-width:360px){.tabs a{font-size:9px}.tabs a span{font-size:19px}main{padding-left:12px;padding-right:12px}}
+.top{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;padding-top:calc(env(safe-area-inset-top,0px) + 18px);padding-bottom:14px;-webkit-font-smoothing:antialiased}
+.top b,.ver{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+main{padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+.tabs{background:var(--surf);-webkit-backdrop-filter:none;backdrop-filter:none}
+.in{width:100%;background:var(--surf);color:var(--ink);border:2px solid var(--surf2);border-radius:16px;padding:12px 14px;font:inherit;margin-bottom:10px}
+.tools{display:flex;gap:8px;margin-bottom:14px}.tools .in{margin:0;flex:1}
+.chip{background:var(--surf2);color:var(--ink);border:0;border-radius:99px;padding:0 14px;font:inherit;font-weight:800}
+.chip.on{background:var(--sun);color:#15103A}
+.item .body{flex:1;min-width:0}
+.acts{display:flex;flex-direction:column;gap:4px}.acts button{font-size:19px;color:var(--dim)}
+.rxs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.rx{background:var(--surf2);color:var(--ink)!important;border-radius:99px!important;padding:4px 10px!important;font-size:14px!important;font-weight:800}
+.card2{display:none;background:var(--surf);border-radius:20px;padding:16px;margin-top:16px;font-weight:800;font-size:19px}
+.card2 small,.card2 b{display:block;color:var(--dim);font-size:13px;font-weight:700;margin-top:6px}
+.card2 b{margin:0 0 4px;color:var(--sun)}
+html[data-theme=light]{--bg:#FFF7E8;--surf:#F0E8FF;--surf2:#DCD0FF;--ink:#15103A;--dim:#5B5390}
+html[data-theme=light] h1{color:var(--pink);text-shadow:5px 5px 0 var(--sun)}
+html[data-theme=light] .top b,html[data-theme=light] .tabs a.on{color:#15103A}
+.popt{position:relative;display:block;width:100%;text-align:left;border:0;border-radius:14px;background:var(--surf2);color:var(--ink);font:inherit;font-weight:800;padding:12px 14px;margin-bottom:8px;overflow:hidden}
+.pbar{position:absolute;left:0;top:0;bottom:0;background:var(--sun);opacity:.55;transition:width .3s}
+.ptxt{position:relative}
+.pwho{margin-bottom:12px}
+.del{background:none;border:0;color:var(--pink);font:inherit;font-weight:800;float:right}
+.ver{color:#15103A}
+html[data-theme=light] .card2 b{color:#C2265C}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><b>THE LOBBY</b><span class="ver">demo v0.4</span></header>
+<main>
+  <section id="inicio" class="view">
+    <div class="hero">
+      <p class="hint">Sala privada de</p>
+      <h1>THE<br>LOBBY</h1>
+      <div class="slots" id="slots"></div>
+    </div>
+    <div class="card2" id="quote"></div>
+    <div class="card2" id="next"></div>
+    <div class="grid" id="shortcuts"></div>
+  </section>
+
+  <section id="nosotros" class="view">
+    <h2>Nosotros</h2>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="fotos" class="view">
+    <h2>Fotos</h2>
+    <label class="btn" for="ffile" style="display:block;text-align:center;margin-bottom:16px">Añadir fotos</label><input type="file" id="ffile" accept="image/*" multiple hidden>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+  <section id="frases" class="view" data-list="frases" data-who="1" data-react="1" data-ph="Escribe una frase del grupo…" data-empty="Aún no hay frases.">
+    <h2>Frases</h2>
+  </section>
+
+  <section id="momentos" class="view" data-list="momentos" data-react="1" data-ph="Cuenta un momento que queráis recordar…" data-empty="Aún no hay momentos.">
+    <h2>Momentos</h2>
+  </section>
+
+  <section id="juegos" class="view">
+    <h2>Juegos</h2>
+    <div class="game">
+      <h3>Ruleta del grupo</h3>
+      <div class="wheelbox"><i class="pin"></i><canvas id="wheel" width="600" height="600"></canvas></div>
+      <button class="btn" id="spin">Girar</button>
+      <p class="result" id="wres">&nbsp;</p>
+    </div>
+    <div class="game">
+      <h3>¿Quién es más probable?</h3>
+      <p class="q" id="q"></p>
+      <div class="picks" id="picks"></div>
+      <div class="row"><button class="btn ghost" id="nextq">Otra pregunta</button><button class="btn ghost" id="tally-reset">Reiniciar marcador</button></div>
+    </div>
+    <div class="game">
+      <h3>Verdad o reto</h3>
+      <p class="q" id="vor-out">Elige una opción.</p>
+      <div class="row"><button class="btn" id="vor-v">Verdad</button><button class="btn ghost" id="vor-r">Reto</button></div>
+    </div>
+    <div class="game">
+      <h3>Quiz del grupo</h3>
+      <input type="text" class="in" id="qz-q" placeholder="Pregunta"><input type="text" class="in" id="qz-a" placeholder="Respuesta">
+      <button class="btn ghost" id="qz-add" type="button">Guardar pregunta</button>
+      <p class="q" id="qz-out" style="margin-top:16px">Añade preguntas para jugar.</p>
+      <div class="row"><button class="btn" id="qz-next">Pregunta</button><button class="btn ghost" id="qz-show">Ver respuesta</button></div>
+      <div id="qz-list" style="margin-top:14px;text-align:left"></div>
+    </div>
+  </section>
+
+  <section id="ideas" class="view" data-list="ideas" data-ph="Una idea para futuras versiones…" data-empty="Aún no hay ideas.">
+    <h2>Ideas</h2>
+  </section>
+<section id="copia" class="view"><h2>Copia y ajustes</h2>
+    <div class="game" style="text-align:left"><h3>Copia de seguridad</h3><p style="color:var(--dim);margin-bottom:14px">Guarda todo (perfiles, fotos, frases…) en un archivo, o restáuralo. Sirve para pasar el contenido de un móvil a otro.</p>
+    <div class="row"><button class="btn" id="bk-export" type="button">Exportar</button><label class="btn ghost" for="bk-file" id="bk-import">Importar</label></div><input type="file" id="bk-file" accept=".json,application/json" hidden></div>
+    <div class="game"><h3>Tema</h3><button class="btn ghost" id="theme" type="button"></button></div>
+  </section>
+<section id="encuestas" class="view"><h2>Encuestas</h2>
+    <form class="add" id="poll-form"><input type="text" class="in" id="poll-q" placeholder="Pregunta" required><textarea id="poll-o" rows="3" placeholder="Una opción por línea (de 2 a 6)" required></textarea><button class="btn" id="poll-add">Crear encuesta</button></form>
+    <div id="poll-list"></div>
+  </section>
+  <section id="calendario" class="view"><h2>Calendario</h2>
+    <form class="add" id="ev-form"><input type="text" class="in" id="ev-t" placeholder="Plan o cumpleaños" required><input type="date" class="in" id="ev-d" required><button class="btn" id="ev-add">Añadir</button></form>
+    <div id="ev-list"></div>
+  </section>
+</main>
+<nav class="tabs" id="tabs"></nav>
+<dialog id="editor"><form method="dialog" id="pform">
+  <h3 id="ptitle">Perfil</h3>
+  <div class="avatar" id="pav"></div>
+  <div class="row"><label class="btn ghost" for="pfile">Elegir foto</label><input type="file" id="pfile" accept="image/*"><button type="button" class="btn ghost" id="pdel">Quitar foto</button></div>
+  <label class="lbl" for="pnick" style="margin-top:14px">Apodo</label>
+  <input type="text" id="pnick" maxlength="14" placeholder="Sin apodo" autocomplete="off">
+  <div class="row"><button type="button" class="btn ghost" id="pcancel">Cancelar</button><button class="btn" id="psave">Guardar</button></div>
+</form></dialog>
+<dialog id="viewer"><img id="vimg" alt="Foto del grupo"><small id="vdate"></small>
+  <div class="row"><button class="btn ghost" id="vclose">Cerrar</button><button class="btn" id="vdel" style="background:var(--pink);box-shadow:0 4px 0 #b23a5e">Borrar</button></div></dialog>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+const MEMBERS = [
+  {n:'Anas', c:'#FF5C8A'}, {n:'Maykel', c:'#FFD23F'}, {n:'Sebastián', c:'#46E0D0'},
+  {n:'Yeico', c:'#8C7BFF'}, {n:'Anthony', c:'#FF8A3D'}
+];
+const EXTRA = [['encuestas','📊','Encuestas'],['calendario','📅','Calendario'],['copia','💾','Copia y ajustes']];
+const TABS = [['inicio','🏠','Inicio'],['nosotros','👥','Nosotros'],['fotos','📷','Fotos'],['frases','💬','Frases'],
+  ['momentos','⭐','Momentos'],['juegos','🎮','Juegos'],['ideas','💡','Ideas']];
+const $ = (s, r = document) => r.querySelector(s);
+document.querySelectorAll('dialog').forEach(d => { if (!d.showModal) { d.showModal = () => { d.setAttribute('open', ''); d.classList.add('fb'); }; d.close = () => { d.removeAttribute('open'); d.classList.remove('fb'); }; } });
+const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1600); };
+
+$('#tabs').innerHTML = TABS.map(([id,i,l]) => `<a href="#${id}" data-id="${id}"><span>${i}</span>${l}</a>`).join('');
+$('#shortcuts').innerHTML = [...TABS.slice(1), ...EXTRA].map(([id,i,l]) => `<a href="#${id}"><span>${i}</span>${l}</a>`).join('');
+function route() {
+  const hs = location.hash.slice(1), id = TABS.concat(EXTRA).some(t => t[0] === hs) ? hs : 'inicio';
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === id));
+  document.querySelectorAll('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.id === (TABS.some(t => t[0] === id) ? id : 'inicio')));
+  scrollTo(0, 0);
+}
+addEventListener('hashchange', route); route();
+
+let PROF = {}; try { PROF = JSON.parse(localStorage.getItem('lobby:profiles')) || {}; } catch (e) {}
+const byName = n => MEMBERS.find(m => m.n === n) || {n: n, c: '#B9B0E8'};
+const lab = m => (PROF[m.n] && PROF[m.n].nick) || m.n;
+const avatar = (m, cls) => { const p = PROF[m.n] || {}; return `<div class="avatar" ${p.photo ? `style="background-image:url(${p.photo})"` : ''}>${p.photo ? '' : m.n[0]}</div>`; };
+function renderProfiles() {
+  $('#slots').innerHTML = MEMBERS.map(m => `<span class="slot" style="background:${m.c}">${esc(lab(m))}</span>`).join('');
+  $('#cards').innerHTML = MEMBERS.map(m => { const nick = PROF[m.n] && PROF[m.n].nick; return `<button class="card" style="--c:${m.c}" data-n="${m.n}">${avatar(m)}<div><b>${esc(lab(m))}</b><small>${nick ? esc(m.n) : 'Toca para crear el perfil'}</small></div></button>`; }).join('');
+  dispatchEvent(new Event('profiles'));
+}
+const ed = $('#editor'); let editing = null, tmpPhoto = null;
+function paintEditor() { const m = byName(editing), a = $('#pav'); a.style.background = tmpPhoto ? `center/cover url(${tmpPhoto})` : m.c; a.textContent = tmpPhoto ? '' : m.n[0]; }
+$('#cards').addEventListener('click', e => {
+  const c = e.target.closest('.card'); if (!c) return;
+  editing = c.dataset.n; const p = PROF[editing] || {}; tmpPhoto = p.photo || null;
+  $('#ptitle').textContent = 'Perfil de ' + editing; $('#pnick').value = p.nick || ''; paintEditor(); ed.showModal();
+});
+$('#pfile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => {
+    const s = 256, cv2 = document.createElement('canvas'); cv2.width = cv2.height = s; const k = Math.min(img.width, img.height);
+    cv2.getContext('2d').drawImage(img, (img.width - k) / 2, (img.height - k) / 2, k, k, 0, 0, s, s);
+    tmpPhoto = cv2.toDataURL('image/jpeg', .8); URL.revokeObjectURL(url); paintEditor();
+  };
+  img.onerror = () => toast('No se pudo leer la foto'); img.src = url; e.target.value = '';
+});
+$('#pdel').onclick = () => { tmpPhoto = null; paintEditor(); };
+$('#pcancel').onclick = () => ed.close();
+$('#pform').addEventListener('submit', e => {
+  e.preventDefault(); ed.close();
+  const nick = $('#pnick').value.trim(); PROF[editing] = {nick: nick, photo: tmpPhoto};
+  if (!nick && !tmpPhoto) delete PROF[editing];
+  try { localStorage.setItem('lobby:profiles', JSON.stringify(PROF)); } catch (e) { toast('No se pudo guardar'); }
+  renderProfiles(); toast('Perfil guardado');
+});
+renderProfiles();
+
+// Listas locales (Frases, Momentos, Ideas): solo en este dispositivo
+const EMO = ['👍', '😂', '🔥', '❤️'];
+document.querySelectorAll('[data-list]').forEach(sec => {
+  const key = 'lobby:' + sec.dataset.list, who = sec.dataset.who, react = sec.dataset.react;
+  let items = [], edit = -1, q = '', favOnly = false;
+  try { items = JSON.parse(localStorage.getItem(key)) || []; } catch (e) {}
+  const save = () => { try { localStorage.setItem(key, JSON.stringify(items)); } catch (e) { toast('No se pudo guardar'); } };
+  const opts = () => MEMBERS.map(m => `<option value="${m.n}">${esc(lab(m))}</option>`).join('');
+  sec.insertAdjacentHTML('beforeend', `<form class="add"><textarea rows="3" placeholder="${sec.dataset.ph}" required></textarea>${who ? `<select>${opts()}</select>` : ''}<button class="btn">Añadir</button></form>
+    <div class="tools"><input type="search" class="srch in" placeholder="Buscar…"><button type="button" class="chip favf">★ Favoritas</button></div><div class="list"></div>`);
+  const list = $('.list', sec), ta = $('textarea', sec), sel = $('select', sec), btn = $('.add .btn', sec);
+  const draw = () => {
+    const rows = items.map((it, i) => [it, i]).filter(([it]) => (!q || it.t.toLowerCase().includes(q)) && (!favOnly || it.f));
+    list.innerHTML = rows.length ? rows.map(([it, i]) => `<div class="item"><div class="body">${esc(it.t)}<small>${it.w ? '— ' + esc(lab(byName(it.w))) + ' · ' : ''}${it.d}</small>${react ? `<div class="rxs">${EMO.map(e => `<button class="rx" data-a="rx" data-i="${i}" data-e="${e}">${e}${(it.r && it.r[e]) ? ' ' + it.r[e] : ''}</button>`).join('')}</div>` : ''}</div>
+      <div class="acts"><button data-a="fav" data-i="${i}" aria-label="Favorita">${it.f ? '★' : '☆'}</button><button data-a="edit" data-i="${i}" aria-label="Editar">✎</button><button data-a="del" data-i="${i}" aria-label="Borrar">✕</button></div></div>`).join('')
+      : `<div class="empty"><p>${items.length ? 'Nada que coincida.' : sec.dataset.empty}</p></div>`;
+  };
+  $('form', sec).addEventListener('submit', e => {
+    e.preventDefault(); const t = ta.value.trim(); if (!t) return;
+    if (edit >= 0) { items[edit].t = t; if (sel) items[edit].w = sel.value; edit = -1; btn.textContent = 'Añadir'; toast('Cambios guardados'); }
+    else { items.unshift({t: t, w: sel ? sel.value : '', d: new Date().toLocaleDateString('es-BE')}); toast('Añadido'); }
+    ta.value = ''; save(); draw();
+  });
+  $('.srch', sec).addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); draw(); });
+  $('.favf', sec).onclick = e => { favOnly = !favOnly; e.currentTarget.classList.toggle('on', favOnly); draw(); };
+  list.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i, it = items[i], a = b.dataset.a;
+    if (a === 'del') { items.splice(i, 1); if (edit === i) { edit = -1; ta.value = ''; btn.textContent = 'Añadir'; } else if (edit > i) edit--; }
+    else if (a === 'fav') it.f = !it.f;
+    else if (a === 'rx') { it.r = it.r || {}; it.r[b.dataset.e] = (it.r[b.dataset.e] || 0) + 1; }
+    else if (a === 'edit') { edit = i; ta.value = it.t; if (sel) sel.value = it.w; btn.textContent = 'Guardar cambios'; ta.focus(); scrollTo(0, 0); return; }
+    save(); draw();
+  });
+  addEventListener('profiles', () => { const v = sel && sel.value; if (sel) { sel.innerHTML = opts(); sel.value = v; } draw(); });
+  draw();
+});
+
+// Fotos: se guardan solo en este dispositivo (IndexedDB)
+const DB = new Promise((res, rej) => { const r = indexedDB.open('lobby', 1); r.onupgradeneeded = () => r.result.createObjectStore('photos', {keyPath: 'id', autoIncrement: true}); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const tx = async (mode, fn) => { const db = await DB; return new Promise((res, rej) => { const t = db.transaction('photos', mode); const q = fn(t.objectStore('photos')); t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => rej(t.error); }); };
+const shrink = f => new Promise((res, rej) => {
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => { const k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(u); c.toBlob(b => b ? res(b) : rej(new Error('blob')), 'image/jpeg', .82); };
+  img.onerror = () => rej(new Error('img')); img.src = u;
+});
+let urls = [], curId = null;
+async function drawGallery() {
+  urls.forEach(u => URL.revokeObjectURL(u)); urls = [];
+  let ps = []; try { ps = (await tx('readonly', s => s.getAll())) || []; } catch (e) { toast('Las fotos no están disponibles'); }
+  ps.sort((a, b) => b.id - a.id);
+  $('#gallery').innerHTML = ps.length ? ps.map(p => { const u = URL.createObjectURL(p.blob); urls.push(u);
+    return `<button data-id="${p.id}" data-u="${u}" data-d="${p.d}" style="background-image:url(${u})" aria-label="Abrir foto"></button>`; }).join('')
+    : '<div class="empty"><span>📷</span><p>Aún no hay fotos.<br>Añade la primera.</p></div>';
+}
+$('#ffile').addEventListener('change', async e => {
+  const files = [...e.target.files]; e.target.value = ''; let ok = 0;
+  for (const f of files) { try { const blob = await shrink(f); await tx('readwrite', s => s.add({blob: blob, d: new Date().toLocaleDateString('es-BE')})); ok++; } catch (err) { toast('No se pudo guardar una foto'); } }
+  if (ok) { toast(ok + (ok > 1 ? ' fotos añadidas' : ' foto añadida')); navigator.storage && navigator.storage.persist && navigator.storage.persist(); drawGallery(); }
+});
+$('#gallery').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; curId = +b.dataset.id; $('#vimg').src = b.dataset.u; $('#vdate').textContent = b.dataset.d; $('#viewer').showModal(); });
+$('#vclose').onclick = () => $('#viewer').close();
+$('#vdel').onclick = async () => { if (!confirm('¿Borrar esta foto?')) return; try { await tx('readwrite', s => s.delete(curId)); } catch (e) {} $('#viewer').close(); drawGallery(); toast('Foto borrada'); };
+drawGallery();
+
+// Copia de seguridad
+const b64 = b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); });
+$('#bk-export').onclick = async () => {
+  try {
+    const data = {app: 'THE LOBBY', v: 1, ls: {}, photos: []};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('lobby:')) data.ls[k] = localStorage.getItem(k); }
+    for (const p of (await tx('readonly', s => s.getAll())) || []) data.photos.push({d: p.d, img: await b64(p.blob)});
+    const file = new File([JSON.stringify(data)], 'the-lobby-copia-' + new Date().toISOString().slice(0, 10) + '.json', {type: 'application/json'});
+    if (navigator.canShare && navigator.canShare({files: [file]})) await navigator.share({files: [file]});
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+    toast('Copia creada');
+  } catch (e) { if (e.name !== 'AbortError') toast('No se pudo crear la copia'); }
+};
+$('#bk-file').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text()); if (data.app !== 'THE LOBBY') throw 0;
+    if (!confirm('Esto sustituirá lo que hay ahora en este móvil. ¿Continuar?')) return;
+    Object.keys(localStorage).filter(k => k.startsWith('lobby:')).forEach(k => localStorage.removeItem(k));
+    Object.entries(data.ls).forEach(([k, v]) => localStorage.setItem(k, v));
+    await tx('readwrite', s => s.clear());
+    for (const p of data.photos) { const blob = await (await fetch(p.img)).blob(); await tx('readwrite', s => s.add({blob: blob, d: p.d})); }
+    location.reload();
+  } catch (err) { toast('Archivo no válido'); }
+});
+
+// Ruleta del grupo
+const cv = $('#wheel'), ctx = cv.getContext('2d'), N = MEMBERS.length, SEG = 2 * Math.PI / N;
+let rot = 0, spinning = false;
+function drawWheel() {
+  const s = cv.width, r = s / 2; ctx.clearRect(0, 0, s, s);
+  MEMBERS.forEach((m, i) => {
+    ctx.beginPath(); ctx.moveTo(r, r); ctx.arc(r, r, r - 6, rot + i * SEG, rot + (i + 1) * SEG); ctx.closePath();
+    ctx.fillStyle = m.c; ctx.fill(); ctx.strokeStyle = '#15103A'; ctx.lineWidth = 6; ctx.stroke();
+    ctx.save(); ctx.translate(r, r); ctx.rotate(rot + (i + .5) * SEG); ctx.textAlign = 'right';
+    ctx.fillStyle = '#15103A'; ctx.font = `900 ${lab(m).length > 9 ? 32 : 44}px ui-rounded, system-ui, sans-serif`; ctx.fillText(lab(m), r - 36, 13); ctx.restore();
+  });
+  ctx.beginPath(); ctx.arc(r, r, 34, 0, 7); ctx.fillStyle = '#15103A'; ctx.fill();
+}
+$('#spin').onclick = () => {
+  if (spinning) return; spinning = true; $('#wres').innerHTML = '&nbsp;';
+  const start = rot, extra = (5 + Math.random() * 3) * 2 * Math.PI + Math.random() * 2 * Math.PI, dur = 4200, t0 = performance.now();
+  (function step(t) {
+    const p = Math.min((t - t0) / dur, 1); rot = start + extra * (1 - Math.pow(1 - p, 3)); drawWheel();
+    if (p < 1) return requestAnimationFrame(step);
+    spinning = false;
+    const a = ((1.5 * Math.PI - rot) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    $('#wres').textContent = '👉 ' + lab(MEMBERS[Math.floor(a / SEG)]); navigator.vibrate && navigator.vibrate(60);
+  })(t0);
+};
+drawWheel();
+
+// ¿Quién es más probable?
+const QS = ['¿Quién es más probable que llegue tarde a un plan?','¿Quién es más probable que se quede dormido en una llamada?',
+'¿Quién es más probable que se haga famoso?','¿Quién es más probable que olvide un cumpleaños?','¿Quién es más probable que gane una partida sin esfuerzo?',
+'¿Quién es más probable que pierda el móvil?','¿Quién es más probable que empiece un proyecto y no lo acabe?','¿Quién es más probable que se ría en el peor momento?',
+'¿Quién es más probable que organice el próximo plan?','¿Quién es más probable que cambie de opinión cinco veces?',
+'¿Quién es más probable que conteste un mensaje una semana después?','¿Quién es más probable que sobreviva en una isla desierta?',
+'¿Quién es más probable que se enfade jugando?','¿Quién es más probable que cuente la mejor historia?',
+'¿Quién es más probable que llegue el primero a cualquier sitio?','¿Quién es más probable que se lleve el último trozo de pizza?',
+'¿Quién es más probable que sea millonario en diez años?'];
+let qi = -1, tally = {}; try { tally = JSON.parse(localStorage.getItem('lobby:tally')) || {}; } catch (e) {} MEMBERS.forEach(m => tally[m.n] = tally[m.n] || 0);
+const renderPicks = () => $('#picks').innerHTML = MEMBERS.map(m => `<button class="pick" style="--c:${m.c}" data-n="${m.n}">${esc(lab(m))}<i>${tally[m.n]}</i></button>`).join('');
+function nextQ() { let n; do { n = Math.floor(Math.random() * QS.length); } while (n === qi); qi = n; $('#q').textContent = QS[qi]; }
+$('#picks').onclick = e => { const b = e.target.closest('.pick'); if (b) { tally[b.dataset.n]++; localStorage.setItem('lobby:tally', JSON.stringify(tally)); renderPicks(); toast('Voto para ' + lab(byName(b.dataset.n))); } };
+$('#nextq').onclick = nextQ; nextQ(); renderPicks();
+addEventListener('profiles', () => { renderPicks(); drawWheel(); });
+
+// Frase aleatoria y próximo plan en Inicio
+function renderQuote() {
+  let it = []; try { it = JSON.parse(localStorage.getItem('lobby:frases')) || []; } catch (e) {}
+  const q = $('#quote'); if (!it.length) { q.style.display = 'none'; return; }
+  const x = it[Math.floor(Math.random() * it.length)]; q.style.display = 'block';
+  q.innerHTML = `“${esc(x.t)}”<small>— ${esc(lab(byName(x.w)))} · toca para otra</small>`;
+}
+$('#quote').onclick = renderQuote;
+window.renderHome = () => { renderQuote(); window.renderNext && window.renderNext(); };
+addEventListener('hashchange', () => { if (!location.hash || location.hash === '#inicio') renderHome(); });
+renderHome();
+
+// Marcador, verdad o reto y quiz
+$('#tally-reset').onclick = () => { if (!confirm('¿Reiniciar el marcador?')) return; MEMBERS.forEach(m => tally[m.n] = 0); localStorage.setItem('lobby:tally', JSON.stringify(tally)); renderPicks(); };
+const VERD = ['¿Cuál ha sido tu momento más vergonzoso con el grupo?', '¿Qué es lo último que buscaste en internet?', '¿Qué plan del grupo repetirías mañana mismo?', '¿Cuál es tu mayor manía?', '¿Qué cosa te da miedo y nadie sabe?', '¿Qué app usas más de la cuenta?', '¿Cuál es la mejor anécdota que tienes con el grupo?', '¿Qué es lo más raro que has comido?', '¿A quién del grupo llamarías a las 3 de la mañana?', '¿Qué habilidad inútil tienes?'];
+const RETOS = ['Imita a alguien del grupo hasta que lo adivinen.', 'Habla con acento raro durante 3 turnos.', 'Cuenta un chiste, y si nadie se ríe, repite.', 'Haz 10 sentadillas ahora mismo.', 'Di el abecedario al revés lo más rápido que puedas.', 'Escribe un mensaje absurdo al grupo.', 'Baila 20 segundos sin música.', 'Describe tu día como si fuera una película de miedo.', 'Cambia tu apodo en la app por el que elija el grupo.', 'Mantén la cara seria mientras todos intentan hacerte reír.'];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+$('#vor-v').onclick = () => $('#vor-out').textContent = '🤔 ' + pick(VERD);
+$('#vor-r').onclick = () => $('#vor-out').textContent = '🔥 ' + pick(RETOS);
+let qz = []; try { qz = JSON.parse(localStorage.getItem('lobby:quiz')) || []; } catch (e) {} let qzCur = -1;
+const saveQz = () => localStorage.setItem('lobby:quiz', JSON.stringify(qz));
+function drawQz() { $('#qz-list').innerHTML = qz.map((x, i) => `<div class="item"><div class="body">${esc(x.q)}</div><div class="acts"><button data-i="${i}" aria-label="Borrar">✕</button></div></div>`).join(''); }
+$('#qz-add').onclick = () => { const q = $('#qz-q').value.trim(), a = $('#qz-a').value.trim(); if (!q || !a) return toast('Escribe pregunta y respuesta'); qz.push({q: q, a: a}); saveQz(); $('#qz-q').value = $('#qz-a').value = ''; drawQz(); toast('Pregunta guardada'); };
+$('#qz-list').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; qz.splice(+b.dataset.i, 1); qzCur = -1; saveQz(); drawQz(); });
+$('#qz-next').onclick = () => { if (!qz.length) return toast('Primero añade preguntas'); let n; do { n = Math.floor(Math.random() * qz.length); } while (qz.length > 1 && n === qzCur); qzCur = n; $('#qz-out').textContent = qz[n].q; };
+$('#qz-show').onclick = () => { if (qzCur >= 0 && qz[qzCur]) $('#qz-out').textContent = qz[qzCur].q + ' → ' + qz[qzCur].a; };
+drawQz();
+
+// Encuestas
+let polls = [], lastWho = 'Anas'; try { polls = JSON.parse(localStorage.getItem('lobby:polls')) || []; } catch (e) {}
+const savePolls = () => localStorage.setItem('lobby:polls', JSON.stringify(polls));
+function drawPolls() {
+  $('#poll-list').innerHTML = polls.length ? polls.map((p, i) => { const tot = Object.keys(p.v).length;
+    return `<div class="game" style="text-align:left" data-i="${i}"><h3>${esc(p.q)}</h3><select class="pwho">${MEMBERS.map(m => `<option value="${m.n}">${esc(lab(m))}</option>`).join('')}</select>` +
+      p.o.map((o, j) => { const n = Object.values(p.v).filter(x => x === j).length, pc = tot ? Math.round(100 * n / tot) : 0;
+        return `<button class="popt" data-j="${j}"><span class="pbar" style="width:${pc}%"></span><span class="ptxt">${esc(o)} · ${n} (${pc}%)</span></button>`; }).join('') +
+      `<small style="color:var(--dim)">${tot} voto${tot === 1 ? '' : 's'} · elige quién vota y toca una opción</small><button class="del" data-a="pdel">Borrar</button></div>`; }).join('')
+    : '<div class="empty"><p>Aún no hay encuestas.</p></div>';
+  document.querySelectorAll('.pwho').forEach(s => s.value = lastWho);
+}
+$('#poll-form').addEventListener('submit', e => {
+  e.preventDefault(); const o = $('#poll-o').value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 6);
+  if (o.length < 2) return toast('Pon al menos 2 opciones');
+  polls.unshift({q: $('#poll-q').value.trim(), o: o, v: {}}); savePolls(); $('#poll-q').value = $('#poll-o').value = ''; drawPolls(); toast('Encuesta creada');
+});
+$('#poll-list').addEventListener('change', e => { if (e.target.classList.contains('pwho')) { lastWho = e.target.value; document.querySelectorAll('.pwho').forEach(s => s.value = lastWho); } });
+$('#poll-list').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; const i = +b.closest('.game').dataset.i;
+  if (b.dataset.a === 'pdel') polls.splice(i, 1);
+  else { lastWho = b.closest('.game').querySelector('.pwho').value; polls[i].v[lastWho] = +b.dataset.j; }
+  savePolls(); drawPolls();
+});
+addEventListener('profiles', drawPolls); drawPolls();
+
+// Calendario y cuenta atrás
+let evs = []; try { evs = JSON.parse(localStorage.getItem('lobby:eventos')) || []; } catch (e) {}
+const days = d => Math.round((new Date(d + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5);
+const when = n => n === 0 ? '¡Hoy!' : n === 1 ? 'Mañana' : n > 1 ? `Faltan ${n} días` : `Hace ${-n} días`;
+window.renderNext = () => { const f = evs.filter(x => days(x.d) >= 0)[0]; const el = $('#next'); el.style.display = f ? 'block' : 'none'; if (f) el.innerHTML = `<b>Próximo plan</b>${esc(f.t)}<small>${when(days(f.d))} · ${f.d}</small>`; };
+function drawEvs() {
+  evs.sort((a, b) => a.d.localeCompare(b.d));
+  $('#ev-list').innerHTML = evs.length ? evs.map((x, i) => `<div class="item"><div class="body">${esc(x.t)}<small>${x.d} · ${when(days(x.d))}</small></div><div class="acts"><button data-i="${i}" aria-label="Borrar">✕</button></div></div>`).join('') : '<div class="empty"><p>Aún no hay planes.</p></div>';
+  renderNext();
+}
+$('#ev-form').addEventListener('submit', e => { e.preventDefault(); evs.push({t: $('#ev-t').value.trim(), d: $('#ev-d').value}); localStorage.setItem('lobby:eventos', JSON.stringify(evs)); $('#ev-t').value = $('#ev-d').value = ''; drawEvs(); toast('Plan añadido'); });
+$('#ev-list').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; evs.splice(+b.dataset.i, 1); localStorage.setItem('lobby:eventos', JSON.stringify(evs)); drawEvs(); });
+drawEvs();
+
+// Tema claro / oscuro
+const applyTheme = t => { document.documentElement.dataset.theme = t; $('meta[name=theme-color]').content = t === 'light' ? '#FFF7E8' : '#15103A'; $('#theme').textContent = t === 'light' ? '🌙 Cambiar a oscuro' : '☀️ Cambiar a claro'; };
+applyTheme(localStorage.getItem('lobby:theme') || 'dark');
+$('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'; localStorage.setItem('lobby:theme', t); applyTheme(t); };
+
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+})();
+</script>
+</body>
+</html>
