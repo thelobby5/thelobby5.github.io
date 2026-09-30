@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="THE LOBBY 5">
 <meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) document.documentElement.classList.add('app');</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -130,20 +131,21 @@ html[data-theme=light] .five{color:var(--sun);text-shadow:5px 5px 0 var(--pink)}
 .gbox .chip{padding:10px 14px;margin:6px 4px 0}
 .popt.mine{outline:3px solid var(--sun)}
 .popt small{font-weight:600;opacity:.8}
-html{height:100%;overflow:hidden}
-body{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden}
-.top{position:static;flex:none}
-main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;width:100%;max-width:none;margin:0;padding:14px max(18px,calc((100% - 524px)/2)) 24px}
-.tabs{position:static;flex:none}
-body.kb .tabs{display:none}
-@media (max-width:360px){main{padding-left:12px;padding-right:12px}}
+html.app{height:100%;overflow:hidden}
+html.app body{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden}
+html.app .top{position:static;flex:none}
+html.app main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;width:100%;max-width:none;margin:0;padding:14px max(18px,calc((100% - 524px)/2)) 24px}
+html.app .tabs{position:static;flex:none}
+html.app body.kb .tabs{display:none}
+@media (max-width:360px){html.app main{padding-left:12px;padding-right:12px}}
+html:not(.app) main{min-height:calc(100vh + 100px)}
 .item .acts{flex:none;white-space:normal}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.5.1</span></header>
+<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.5.2</span></header>
 <main>
   <section id="inicio" class="view">
     <div class="hero">
@@ -251,6 +253,7 @@ const EXTRA = [['encuestas','📊','Encuestas'],['calendario','📅','Calendario
 const TABS = [['inicio','🏠','Inicio'],['nosotros','👥','Nosotros'],['fotos','📷','Fotos'],['frases','💬','Frases'],
   ['momentos','⭐','Momentos'],['juegos','🎮','Juegos'],['ideas','💡','Ideas']];
 const $ = (s, r = document) => r.querySelector(s);
+const toTop = () => { $('main').scrollTop = 0; window.scrollTo(0, 0); };
 document.querySelectorAll('dialog').forEach(d => { if (!d.showModal) { d.showModal = () => { d.setAttribute('open', ''); d.classList.add('fb'); }; d.close = () => { d.removeAttribute('open'); d.classList.remove('fb'); }; } });
 const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1600); };
@@ -261,7 +264,7 @@ function route() {
   const hs = location.hash.slice(1), id = TABS.concat(EXTRA).some(t => t[0] === hs) ? hs : 'inicio';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === id));
   document.querySelectorAll('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.id === (TABS.some(t => t[0] === id) ? id : 'inicio')));
-  $('main').scrollTop = 0;
+  toTop();
 }
 addEventListener('hashchange', route); route();
 
@@ -382,7 +385,7 @@ document.querySelectorAll('[data-list]').forEach(sec => {
     try {
       if (a === 'fav') { const k = kind + ':' + id; FAVS.has(k) ? FAVS.delete(k) : FAVS.add(k); localStorage.setItem('lobby:favs', JSON.stringify([...FAVS])); draw(); }
       else if (a === 'rx') { it.reactions = await api('/rest/v1/rpc/react', {m: 'POST', b: {pid: id, emo: b.dataset.e}}); draw(); }
-      else if (a === 'edit') { edit = id; ta.value = it.body; btn.textContent = 'Guardar cambios'; ta.focus(); $('main').scrollTop = 0; }
+      else if (a === 'edit') { edit = id; ta.value = it.body; btn.textContent = 'Guardar cambios'; ta.focus(); toTop(); }
       else if (a === 'del') { if (edit === id) reset(); await api(`/rest/v1/posts?id=eq.${id}`, {m: 'DELETE'}); await loadPosts(kind); }
     } catch (err) { toast('No se pudo (¿sin conexión?)'); }
   });
@@ -559,7 +562,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && S 
 if (REC) { gate.hidden = false; gshow('g3'); } else if (S && S.me) start(); else { gate.hidden = false; gshow('g1'); }
 
 // Barra de arriba y de abajo siempre fijas (también con el teclado abierto en iPhone)
-if (window.visualViewport) {
+if (window.visualViewport && document.documentElement.classList.contains('app')) {
   const vv = visualViewport, fit = () => { document.body.style.height = vv.height + 'px'; document.body.classList.toggle('kb', vv.height < innerHeight - 120); window.scrollTo(0, 0); };
   vv.addEventListener('resize', fit); vv.addEventListener('scroll', () => window.scrollTo(0, 0)); fit();
 }
