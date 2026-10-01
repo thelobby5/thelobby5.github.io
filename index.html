@@ -165,12 +165,14 @@ html.app .chatform{bottom:0}
 #chat.on{display:flex;flex-direction:column;min-height:calc(100vh - 70px - env(safe-area-inset-bottom,0px))}
 html.app #chat.on{min-height:100%}
 #chat-list{flex:1}
+html.app{background:var(--surf)}
+html.app .top{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6</span></header>
+<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6.1</span></header>
 <main>
   <section id="inicio" class="view">
     <div class="hero">
@@ -619,12 +621,12 @@ async function buildWrapped() {
   const emo = {}; posts.forEach(p => Object.entries(p.reactions || {}).forEach(([e, n]) => { emo[e] = (emo[e] || 0) + n; }));
   const rank = o => topN(o).map(([n, c], i) => `${['🥇', '🥈', '🥉'][i]} ${nm(n)} · ${c}`).join('<br>') || 'Nadie todavía', te = topN(emo, 1)[0];
   WS = [
+    ['THE LOBBY 5', WP === 'mes' ? 'Vuestros últimos 30 días' : 'Todo lo que habéis vivido', 'Toca para empezar →'],
     ['Resumen', `${msgs.length} mensajes`, `${posts.filter(p => p.kind === 'frases').length} frases · ${posts.filter(p => p.kind === 'momentos').length} momentos · ${photos.length} fotos`],
     ['Frase estrella', star ? '“' + esc(star.body) + '”' : 'Aún no hay frase estrella', star ? `— ${nm(star.author)} · ${tot(star)} reacciones` : 'Reacciona a las frases para elegirla'],
     ['El que más habla', rank(cnt(msgs)), 'mensajes en el chat'],
     ['El fotógrafo', rank(cnt(photos)), 'fotos subidas'],
-    ['Emoji del grupo', te ? `${te[0]} ×${te[1]}` : '—', 'el más usado en las reacciones'],
-    ['THE LOBBY 5', WP === 'mes' ? 'Vuestros últimos 30 días' : 'Todo lo que habéis vivido', 'Y lo que queda por vivir']
+    ['Emoji del grupo', te ? `${te[0]} ×${te[1]}` : '—', 'el más usado en las reacciones']
   ];
   WI = Math.min(WI, WS.length - 1); drawWrapped();
 }
@@ -632,7 +634,7 @@ $('#wr-card').onclick = e => { const r = e.currentTarget.getBoundingClientRect()
 $('#wr-per').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; WP = b.dataset.p; WI = 0; document.querySelectorAll('#wr-per .chip').forEach(c => c.classList.toggle('on', c === b)); buildWrapped(); };
 
 // ===== Notificaciones =====
-const VAPID = window.LOBBY_VAPID || 'BHTPlsZShe5X7deSvolNZwDtqdpDsRClIYNZJv-A8X8yfCNK5knYuev5vViQqqafx9JT-IO1W1eT9YyiMzP2IQI';
+const VAPID = window.LOBBY_VAPID || 'PEGA_AQUI_TU_CLAVE_PUBLICA_VAPID';
 const b64u = s => Uint8Array.from(atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
 async function pushRefresh() {
   const info = $('#push-info'), btn = $('#push-btn');
@@ -705,8 +707,15 @@ if (REC) { gate.hidden = false; gshow('g3'); } else if (S && S.me) start(); else
 
 // Barra de arriba y de abajo siempre fijas (también con el teclado abierto en iPhone)
 if (window.visualViewport && document.documentElement.classList.contains('app')) {
-  const vv = visualViewport, fit = () => { document.body.style.height = vv.height + 'px'; document.body.classList.toggle('kb', vv.height < innerHeight - 120); window.scrollTo(0, 0); };
-  vv.addEventListener('resize', fit); vv.addEventListener('scroll', () => window.scrollTo(0, 0)); fit();
+  const vv = visualViewport; let base = vv.height, w = innerWidth;
+  const fit = () => {
+    if (innerWidth !== w) { w = innerWidth; base = vv.height; }
+    if (vv.height > base) base = vv.height;
+    const kb = base - vv.height, open = kb > 100;
+    document.body.style.height = open ? (innerHeight - kb) + 'px' : '';
+    document.body.classList.toggle('kb', open); window.scrollTo(0, 0);
+  };
+  vv.addEventListener('resize', fit); vv.addEventListener('scroll', () => window.scrollTo(0, 0));
 }
 
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
