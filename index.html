@@ -140,12 +140,37 @@ html.app body.kb .tabs{display:none}
 @media (max-width:360px){html.app main{padding-left:12px;padding-right:12px}}
 html:not(.app) main{min-height:calc(100vh + 100px)}
 .item .acts{flex:none;white-space:normal}
+.tabs a{position:relative}
+.dot{position:absolute;top:0;left:54%;min-width:16px;height:16px;border-radius:99px;background:var(--pink);color:#fff;font-size:10px;line-height:16px;font-style:normal;padding:0 4px;font-weight:900}
+dialog input[type=date]{width:100%;background:var(--bg);color:var(--ink);border:2px solid var(--surf2);border-radius:16px;padding:12px 14px;font:inherit;margin:8px 0 14px}
+.item.pinned{outline:2px solid var(--sun)}
+.pin{display:block;font-size:12px;font-weight:800;color:var(--sun);margin-bottom:4px}
+.cmb{background:var(--surf2);color:var(--ink);border-radius:99px!important;padding:4px 10px!important;font-size:14px!important;font-weight:800}
+.thread{margin-top:10px;border-top:2px solid var(--surf2);padding-top:8px}
+.cm{font-size:15px;padding:4px 0}.cm b{color:var(--dim)}.cm button{background:none;border:0;color:var(--dim);margin-left:6px}
+.cmf{display:flex;gap:8px;margin-top:8px}.cmf .in{margin:0;flex:1}.cmf .chip{padding:0 14px}
+.chat{display:flex;flex-direction:column;gap:8px;padding-bottom:8px}
+.msg{max-width:82%;padding:8px 12px;border-radius:16px 16px 16px 4px;background:var(--surf);align-self:flex-start;word-break:break-word;white-space:pre-wrap}
+.msg.mine{align-self:flex-end;background:var(--sun);color:#15103A;border-radius:16px 16px 4px 16px}
+.msg b{display:block;font-size:12px;color:var(--c,var(--dim))}.msg.mine b{display:none}
+.msg small{display:block;font-size:11px;opacity:.65;text-align:right}.msg small button{background:none;border:0;color:inherit;font-size:12px}
+.chatform{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);display:flex;gap:8px;background:var(--bg);padding:10px 0;z-index:3}
+html.app .chatform{bottom:0}
+.chatform .in{margin:0;flex:1}.chatform .btn{padding:12px 16px}
+.story{border-radius:28px;padding:28px 22px;min-height:360px;display:flex;flex-direction:column;justify-content:center;gap:12px;color:#15103A;cursor:pointer;user-select:none}
+.story h3{font-size:15px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin:0}
+.story .big{font-size:36px;font-weight:900;line-height:1.1;word-break:break-word}
+.story p{font-size:18px;font-weight:700}
+.dots{display:flex;gap:6px;justify-content:center;margin:14px 0}.dots i{width:8px;height:8px;border-radius:50%;background:var(--surf2)}.dots i.on{background:var(--sun)}
+#chat.on{display:flex;flex-direction:column;min-height:calc(100vh - 70px - env(safe-area-inset-bottom,0px))}
+html.app #chat.on{min-height:100%}
+#chat-list{flex:1}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.5.2</span></header>
+<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6</span></header>
 <main>
   <section id="inicio" class="view">
     <div class="hero">
@@ -169,11 +194,11 @@ html:not(.app) main{min-height:calc(100vh + 100px)}
     <div class="gallery" id="gallery"></div>
   </section>
 
-  <section id="frases" class="view" data-list="frases" data-who="1" data-react="1" data-ph="Escribe una frase del grupo…" data-empty="Aún no hay frases.">
+  <section id="frases" class="view" data-list="frases" data-who="1" data-react="1" data-thread="1" data-ph="Escribe una frase del grupo…" data-empty="Aún no hay frases.">
     <h2>Frases</h2>
   </section>
 
-  <section id="momentos" class="view" data-list="momentos" data-react="1" data-ph="Cuenta un momento que queráis recordar…" data-empty="Aún no hay momentos.">
+  <section id="momentos" class="view" data-list="momentos" data-react="1" data-thread="1" data-ph="Cuenta un momento que queráis recordar…" data-empty="Aún no hay momentos.">
     <h2>Momentos</h2>
   </section>
 
@@ -209,10 +234,20 @@ html:not(.app) main{min-height:calc(100vh + 100px)}
   <section id="ideas" class="view" data-list="ideas" data-ph="Una idea para futuras versiones…" data-empty="Aún no hay ideas.">
     <h2>Ideas</h2>
   </section>
-<section id="copia" class="view"><h2>Ajustes</h2>
+<section id="chat" class="view"><h2>Chat</h2>
+    <div id="chat-list" class="chat"></div>
+    <form id="chat-form" class="chatform"><input type="text" class="in" id="chat-in" placeholder="Escribe un mensaje…" maxlength="1000" autocomplete="off"><button class="btn" id="chat-send">Enviar</button></form>
+  </section>
+  <section id="wrapped" class="view"><h2>Wrapped</h2>
+    <div class="tools" id="wr-per"><button class="chip on" data-p="mes">Últimos 30 días</button><button class="chip" data-p="todo">Todo</button></div>
+    <div class="story" id="wr-card"></div><div class="dots" id="wr-dots"></div>
+    <p class="hint" style="text-align:center">Toca a la derecha para avanzar y a la izquierda para volver</p>
+  </section>
+  <section id="copia" class="view"><h2>Ajustes</h2>
     <div class="game" style="text-align:left"><h3>Tu cuenta</h3><p id="me-line" style="color:var(--dim);margin-bottom:12px"></p>
     <form id="pw-form" class="add"><input type="password" class="in" id="pw-new" placeholder="Nueva contraseña (mínimo 8)" autocomplete="new-password"><button class="btn ghost" id="pw-go">Cambiar contraseña</button></form>
     <button class="btn" id="logout" type="button" style="background:var(--pink);box-shadow:0 4px 0 #b23a5e">Cerrar sesión</button></div>
+    <div class="game" style="text-align:left"><h3>Notificaciones</h3><p id="push-info" style="color:var(--dim);margin-bottom:12px"></p><button class="btn ghost" id="push-btn" type="button" hidden>Activar notificaciones</button></div>
     <div class="game"><h3>Tema</h3><button class="btn ghost" id="theme" type="button"></button></div>
   </section>
 <section id="encuestas" class="view"><h2>Encuestas</h2>
@@ -237,6 +272,7 @@ html:not(.app) main{min-height:calc(100vh + 100px)}
   <div class="row"><label class="btn ghost" for="pfile">Elegir foto</label><input type="file" id="pfile" accept="image/*"><button type="button" class="btn ghost" id="pdel">Quitar foto</button></div>
   <label class="lbl" for="pnick" style="margin-top:14px">Apodo</label>
   <input type="text" id="pnick" maxlength="14" placeholder="Sin apodo" autocomplete="off">
+  <label class="lbl" for="pbday">Cumpleaños (opcional)</label><input type="date" id="pbday">
   <div class="row"><button type="button" class="btn ghost" id="pcancel">Cancelar</button><button class="btn" id="psave">Guardar</button></div>
 </form></dialog>
 <dialog id="viewer"><img id="vimg" alt="Foto del grupo"><small id="vdate"></small>
@@ -249,8 +285,8 @@ const MEMBERS = [
   {n:'Anas', c:'#FF5C8A'}, {n:'Maykel', c:'#FFD23F'}, {n:'Sebastián', c:'#46E0D0'},
   {n:'Yeico', c:'#8C7BFF'}, {n:'Anthony', c:'#FF8A3D'}
 ];
-const EXTRA = [['encuestas','📊','Encuestas'],['calendario','📅','Calendario'],['copia','⚙️','Ajustes']];
-const TABS = [['inicio','🏠','Inicio'],['nosotros','👥','Nosotros'],['fotos','📷','Fotos'],['frases','💬','Frases'],
+const EXTRA = [['nosotros','👥','Nosotros'],['wrapped','🎁','Wrapped'],['encuestas','📊','Encuestas'],['calendario','📅','Calendario'],['copia','⚙️','Ajustes']];
+const TABS = [['inicio','🏠','Inicio'],['chat','🗨️','Chat'],['fotos','📷','Fotos'],['frases','💬','Frases'],
   ['momentos','⭐','Momentos'],['juegos','🎮','Juegos'],['ideas','💡','Ideas']];
 const $ = (s, r = document) => r.querySelector(s);
 const toTop = () => { $('main').scrollTop = 0; window.scrollTo(0, 0); };
@@ -258,7 +294,7 @@ document.querySelectorAll('dialog').forEach(d => { if (!d.showModal) { d.showMod
 const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1600); };
 
-$('#tabs').innerHTML = TABS.map(([id,i,l]) => `<a href="#${id}" data-id="${id}"><span>${i}</span>${l}</a>`).join('');
+$('#tabs').innerHTML = TABS.map(([id,i,l]) => `<a href="#${id}" data-id="${id}"><span>${i}</span>${l}${id === 'chat' ? '<i class="dot" id="chat-dot" hidden></i>' : ''}</a>`).join('');
 $('#shortcuts').innerHTML = [...TABS.slice(1), ...EXTRA].map(([id,i,l]) => `<a href="#${id}"><span>${i}</span>${l}</a>`).join('');
 function route() {
   const hs = location.hash.slice(1), id = TABS.concat(EXTRA).some(t => t[0] === hs) ? hs : 'inicio';
@@ -316,8 +352,8 @@ function renderProfiles() {
   dispatchEvent(new Event('profiles'));
 }
 async function loadMembers() {
-  let rows; try { rows = await api('/rest/v1/members?select=name,nick,photo_path'); localStorage.setItem('lobby:c:members', JSON.stringify(rows)); } catch (e) { try { rows = JSON.parse(localStorage.getItem('lobby:c:members')); } catch (e2) {} }
-  (rows || []).forEach(r => { PROF[r.name] = Object.assign(PROF[r.name] || {}, {nick: r.nick || '', path: r.photo_path || null}); if (!r.photo_path) PROF[r.name].photo = null; });
+  let rows; try { rows = await api('/rest/v1/members?select=name,nick,photo_path,birthday'); localStorage.setItem('lobby:c:members', JSON.stringify(rows)); } catch (e) { try { rows = JSON.parse(localStorage.getItem('lobby:c:members')); } catch (e2) {} }
+  (rows || []).forEach(r => { PROF[r.name] = Object.assign(PROF[r.name] || {}, {nick: r.nick || '', path: r.photo_path || null, bday: r.birthday || ''}); if (!r.photo_path) PROF[r.name].photo = null; });
   renderProfiles();
   (rows || []).forEach(async r => { if (r.photo_path) { const u = await blobUrl(r.photo_path); if (u && PROF[r.name].photo !== u) { PROF[r.name].photo = u; renderProfiles(); } } });
 }
@@ -327,7 +363,7 @@ $('#cards').addEventListener('click', e => {
   const c = e.target.closest('.card'); if (!c) return; editing = c.dataset.n;
   if (editing !== ME()) return toast('Solo puedes editar tu propio perfil');
   const p = PROF[editing] || {}; tmpBlob = null; tmpUrl = p.photo || null;
-  $('#ptitle').textContent = 'Tu perfil'; $('#pnick').value = p.nick || ''; paintEditor(); ed.showModal();
+  $('#ptitle').textContent = 'Tu perfil'; $('#pnick').value = p.nick || ''; $('#pbday').value = p.bday ? '2000-' + p.bday : ''; paintEditor(); ed.showModal();
 });
 $('#pfile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -340,7 +376,7 @@ $('#pform').addEventListener('submit', async e => {
   try {
     if (tmpBlob) { path = 'avatars/' + editing + '-' + Date.now() + '.jpg'; await api('/storage/v1/object/photos/' + path, {m: 'POST', raw: tmpBlob, h: {'Content-Type': 'image/jpeg', Prefer: ''}}); }
     else if (!tmpUrl) path = null;
-    await api('/rest/v1/members?name=eq.' + encodeURIComponent(editing), {m: 'PATCH', b: {nick: nick || null, photo_path: path}});
+    await api('/rest/v1/members?name=eq.' + encodeURIComponent(editing), {m: 'PATCH', b: {nick: nick || null, photo_path: path, birthday: $('#pbday').value ? $('#pbday').value.slice(5) : null}});
     if (p.path && p.path !== path) api('/storage/v1/object/photos/' + p.path, {m: 'DELETE'}).catch(() => {});
     ed.close(); await loadMembers(); toast('Perfil guardado');
   } catch (err) { toast('No se pudo guardar el perfil'); }
@@ -348,7 +384,7 @@ $('#pform').addEventListener('submit', async e => {
 renderProfiles();
 
 // ===== Frases, Momentos, Ideas (compartidos) =====
-const EMO = ['👍', '😂', '🔥', '❤️'], POSTS = {}, LISTS = {};
+const EMO = ['👍', '😂', '🔥', '❤️'], POSTS = {}, LISTS = {}, COMMENTS = {}, OPEN = new Set();
 let FAVS = new Set(); try { FAVS = new Set(JSON.parse(localStorage.getItem('lobby:favs') || '[]')); } catch (e) {}
 const readCache = (k, d) => { try { return JSON.parse(localStorage.getItem('lobby:c:' + k)) || d; } catch (e) { return d; } };
 async function loadPosts(kind) {
@@ -356,18 +392,24 @@ async function loadPosts(kind) {
   catch (e) { POSTS[kind] = readCache(kind, []); }
   LISTS[kind] && LISTS[kind]();
 }
+async function loadComments() {
+  let rows; try { rows = await api('/rest/v1/comments?order=created_at.asc&select=*'); localStorage.setItem('lobby:c:comments', JSON.stringify(rows)); } catch (e) { rows = readCache('comments', []); }
+  Object.keys(COMMENTS).forEach(k => delete COMMENTS[k]); rows.forEach(c => (COMMENTS[c.post_id] = COMMENTS[c.post_id] || []).push(c));
+  ['frases', 'momentos'].forEach(k => LISTS[k] && LISTS[k]());
+}
 document.querySelectorAll('[data-list]').forEach(sec => {
-  const kind = sec.dataset.list, react = sec.dataset.react; let edit = -1, q = '', favOnly = false;
+  const kind = sec.dataset.list, react = sec.dataset.react, thread = sec.dataset.thread; let edit = -1, q = '', favOnly = false;
   POSTS[kind] = readCache(kind, []);
   sec.insertAdjacentHTML('beforeend', `<form class="add"><textarea rows="3" placeholder="${sec.dataset.ph}" required></textarea><button class="btn">Añadir</button></form>
     <div class="tools"><input type="search" class="srch in" placeholder="Buscar…"><button type="button" class="chip favf">★ Favoritas</button></div><div class="list"></div>`);
   const list = $('.list', sec), ta = $('textarea', sec), btn = $('.add .btn', sec);
   const reset = () => { edit = -1; ta.value = ''; btn.textContent = 'Añadir'; };
   const draw = LISTS[kind] = () => {
-    const rows = POSTS[kind].filter(it => (!q || it.body.toLowerCase().includes(q)) && (!favOnly || FAVS.has(kind + ':' + it.id)));
-    list.innerHTML = rows.length ? rows.map(it => { const mine = it.author === ME(), r = it.reactions || {};
-      return `<div class="item"><div class="body">${esc(it.body)}<small>— ${esc(lab(byName(it.author)))} · ${new Date(it.created_at).toLocaleDateString('es-BE')}</small>${react ? `<div class="rxs">${EMO.map(e => `<button class="rx" data-a="rx" data-id="${it.id}" data-e="${e}">${e}${r[e] ? ' ' + r[e] : ''}</button>`).join('')}</div>` : ''}</div>
-      <div class="acts"><button data-a="fav" data-id="${it.id}" aria-label="Favorita">${FAVS.has(kind + ':' + it.id) ? '★' : '☆'}</button>${mine ? `<button data-a="edit" data-id="${it.id}" aria-label="Editar">✎</button><button data-a="del" data-id="${it.id}" aria-label="Borrar">✕</button>` : ''}</div></div>`; }).join('')
+    let rows = POSTS[kind].filter(it => (!q || it.body.toLowerCase().includes(q)) && (!favOnly || FAVS.has(kind + ':' + it.id)));
+    if (thread) rows = rows.slice().sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    list.innerHTML = rows.length ? rows.map(it => { const mine = it.author === ME(), r = it.reactions || {}, cms = COMMENTS[it.id] || [];
+      return `<div class="item${it.pinned ? ' pinned' : ''}"><div class="body">${it.pinned ? '<span class="pin">📌 Fijada</span>' : ''}${esc(it.body)}<small>— ${esc(lab(byName(it.author)))} · ${new Date(it.created_at).toLocaleDateString('es-BE')}</small>${react ? `<div class="rxs">${EMO.map(e => `<button class="rx" data-a="rx" data-id="${it.id}" data-e="${e}">${e}${r[e] ? ' ' + r[e] : ''}</button>`).join('')}</div>` : ''}${thread ? `<div class="rxs"><button class="cmb" data-a="cm" data-id="${it.id}">💬 ${cms.length || ''}</button></div>` : ''}${thread && OPEN.has(it.id) ? `<div class="thread">${cms.map(c => `<div class="cm"><b>${esc(lab(byName(c.author)))}</b> ${esc(c.body)}${c.author === ME() ? `<button data-a="cdel" data-cid="${c.id}" aria-label="Borrar comentario">✕</button>` : ''}</div>`).join('')}<div class="cmf"><input type="text" class="in cin" data-id="${it.id}" placeholder="Escribe un comentario…" maxlength="1000"><button class="chip" data-a="csend" data-id="${it.id}">Enviar</button></div></div>` : ''}</div>
+      <div class="acts"><button data-a="fav" data-id="${it.id}" aria-label="Favorita">${FAVS.has(kind + ':' + it.id) ? '★' : '☆'}</button>${thread ? `<button data-a="pin" data-id="${it.id}" aria-label="Fijar">${it.pinned ? '📌' : '📍'}</button>` : ''}${mine ? `<button data-a="edit" data-id="${it.id}" aria-label="Editar">✎</button><button data-a="del" data-id="${it.id}" aria-label="Borrar">✕</button>` : ''}</div></div>`; }).join('')
       : `<div class="empty"><p>${POSTS[kind].length ? 'Nada que coincida.' : sec.dataset.empty}</p></div>`;
   };
   $('form', sec).addEventListener('submit', async e => {
@@ -380,11 +422,16 @@ document.querySelectorAll('[data-list]').forEach(sec => {
   });
   $('.srch', sec).addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); draw(); });
   $('.favf', sec).onclick = e => { favOnly = !favOnly; e.currentTarget.classList.toggle('on', favOnly); draw(); };
+  list.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('cin')) { e.preventDefault(); list.querySelector(`[data-a=csend][data-id="${e.target.dataset.id}"]`).click(); } });
   list.addEventListener('click', async e => {
     const b = e.target.closest('button'); if (!b) return; const id = +b.dataset.id, it = POSTS[kind].find(x => x.id === id), a = b.dataset.a;
     try {
       if (a === 'fav') { const k = kind + ':' + id; FAVS.has(k) ? FAVS.delete(k) : FAVS.add(k); localStorage.setItem('lobby:favs', JSON.stringify([...FAVS])); draw(); }
       else if (a === 'rx') { it.reactions = await api('/rest/v1/rpc/react', {m: 'POST', b: {pid: id, emo: b.dataset.e}}); draw(); }
+      else if (a === 'cm') { OPEN.has(id) ? OPEN.delete(id) : OPEN.add(id); draw(); }
+      else if (a === 'csend') { const inp = list.querySelector(`.cin[data-id="${id}"]`), t = inp.value.trim(); if (!t) return; await api('/rest/v1/comments', {m: 'POST', b: {post_id: id, author: ME(), body: t}}); await loadComments(); }
+      else if (a === 'cdel') { await api('/rest/v1/comments?id=eq.' + b.dataset.cid, {m: 'DELETE'}); await loadComments(); }
+      else if (a === 'pin') { await api('/rest/v1/rpc/toggle_pin', {m: 'POST', b: {pid: id}}); await loadPosts(kind); }
       else if (a === 'edit') { edit = id; ta.value = it.body; btn.textContent = 'Guardar cambios'; ta.focus(); toTop(); }
       else if (a === 'del') { if (edit === id) reset(); await api(`/rest/v1/posts?id=eq.${id}`, {m: 'DELETE'}); await loadPosts(kind); }
     } catch (err) { toast('No se pudo (¿sin conexión?)'); }
@@ -394,9 +441,10 @@ document.querySelectorAll('[data-list]').forEach(sec => {
 });
 
 // ===== Fotos (compartidas) =====
-let cur = null;
+let cur = null, PHOTOROWS = [];
 async function drawGallery() {
   let rows; try { rows = await api('/rest/v1/photos?order=created_at.desc&select=*'); } catch (e) { return; }
+  PHOTOROWS = rows;
   const us = await Promise.all(rows.map(r => blobUrl(r.path)));
   $('#gallery').innerHTML = rows.length ? rows.map((r, i) => us[i] ? `<button data-id="${r.id}" data-p="${r.path}" data-u="${us[i]}" data-by="${r.created_by}" data-d="${new Date(r.created_at).toLocaleDateString('es-BE')}" style="background-image:url(${us[i]})" aria-label="Abrir foto"></button>` : '').join('')
     : '<div class="empty"><span>📷</span><p>Aún no hay fotos.<br>Añade la primera.</p></div>';
@@ -502,23 +550,113 @@ $('#poll-list').addEventListener('click', async e => {
 });
 addEventListener('profiles', drawPolls); drawPolls();
 
-// ===== Calendario (compartido) =====
+// ===== Calendario (compartido) + cumpleaños automáticos =====
 const days = d => Math.round((new Date(d + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5);
 const when = n => n === 0 ? '¡Hoy!' : n === 1 ? 'Mañana' : n > 1 ? `Faltan ${n} días` : `Hace ${-n} días`;
-window.renderNext = () => { const f = EVS.filter(x => days(x.date) >= 0)[0], el = $('#next'); el.style.display = f ? 'block' : 'none'; if (f) el.innerHTML = `<b>Próximo plan</b>${esc(f.title)}<small>${when(days(f.date))} · ${f.date}</small>`; };
+const validD = d => !isNaN(new Date(d + 'T00:00:00'));
+function nextBday(md) { const y = new Date().getFullYear(); let d = validD(y + '-' + md) ? y + '-' + md : y + '-02-28'; if (days(d) < 0) d = validD((y + 1) + '-' + md) ? (y + 1) + '-' + md : (y + 1) + '-02-28'; return d; }
+const BDAYS = () => MEMBERS.filter(m => PROF[m.n] && PROF[m.n].bday).map(m => ({title: '🎂 Cumple de ' + lab(m), date: nextBday(PROF[m.n].bday), bday: true}));
+const ALLEV = () => EVS.concat(BDAYS()).sort((a, b) => a.date.localeCompare(b.date));
+window.renderNext = () => { const f = ALLEV().filter(x => days(x.date) >= 0)[0], el = $('#next'); el.style.display = f ? 'block' : 'none'; if (f) el.innerHTML = `<b>Próximo plan</b>${esc(f.title)}<small>${when(days(f.date))} · ${f.date}</small>`; };
 function drawEvs() {
-  $('#ev-list').innerHTML = EVS.length ? EVS.map(x => `<div class="item"><div class="body">${esc(x.title)}<small>${x.date} · ${when(days(x.date))} · ${esc(lab(byName(x.created_by)))}</small></div>${x.created_by === ME() ? `<div class="acts"><button data-id="${x.id}" aria-label="Borrar">✕</button></div>` : ''}</div>`).join('') : '<div class="empty"><p>Aún no hay planes.</p></div>';
+  const all = ALLEV();
+  $('#ev-list').innerHTML = all.length ? all.map(x => `<div class="item"><div class="body">${esc(x.title)}<small>${x.date} · ${when(days(x.date))}${x.bday ? '' : ' · ' + esc(lab(byName(x.created_by)))}</small></div>${!x.bday && x.created_by === ME() ? `<div class="acts"><button data-id="${x.id}" aria-label="Borrar">✕</button></div>` : ''}</div>`).join('') : '<div class="empty"><p>Aún no hay planes.</p></div>';
   renderNext();
 }
 async function loadEvs() { try { EVS = await api('/rest/v1/events?order=date.asc&select=*'); localStorage.setItem('lobby:c:events', JSON.stringify(EVS)); } catch (e) {} drawEvs(); }
 $('#ev-form').addEventListener('submit', async e => { e.preventDefault(); try { await api('/rest/v1/events', {m: 'POST', b: {title: $('#ev-t').value.trim(), date: $('#ev-d').value, created_by: ME()}}); $('#ev-t').value = $('#ev-d').value = ''; toast('Plan añadido'); await loadEvs(); } catch (err) { toast('No se pudo (¿sin conexión?)'); } });
 $('#ev-list').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return; try { await api('/rest/v1/events?id=eq.' + b.dataset.id, {m: 'DELETE'}); await loadEvs(); } catch (err) { toast('No se pudo (¿sin conexión?)'); } });
-drawEvs();
+addEventListener('profiles', drawEvs); drawEvs();
 
 // Tema claro / oscuro
 const applyTheme = t => { document.documentElement.dataset.theme = t; $('meta[name=theme-color]').content = t === 'light' ? '#FFF7E8' : '#15103A'; $('#theme').textContent = t === 'light' ? '🌙 Cambiar a oscuro' : '☀️ Cambiar a claro'; };
 applyTheme(localStorage.getItem('lobby:theme') || 'dark');
 $('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'; localStorage.setItem('lobby:theme', t); applyTheme(t); };
+
+// ===== Chat (se actualiza solo cada pocos segundos) =====
+let MSGS = readCache('chat', []), seen = +(localStorage.getItem('lobby:seen') || 0), chatTimer = null;
+const inChat = () => location.hash === '#chat';
+const nearBottom = () => { const m = $('main'), d = document.documentElement; return document.documentElement.classList.contains('app') ? m.scrollHeight - m.scrollTop - m.clientHeight < 140 : d.scrollHeight - window.scrollY - innerHeight < 140; };
+const toBottom = () => { const m = $('main'); m.scrollTop = m.scrollHeight; window.scrollTo(0, document.documentElement.scrollHeight); };
+function drawChat(stick) {
+  $('#chat-list').innerHTML = MSGS.length ? MSGS.map(m => `<div class="msg${m.author === ME() ? ' mine' : ''}" style="--c:${byName(m.author).c}"><b>${esc(lab(byName(m.author)))}</b>${esc(m.body)}<small>${new Date(m.created_at).toLocaleTimeString('es-BE', {hour: '2-digit', minute: '2-digit'})}${m.author === ME() ? ` <button data-id="${m.id}" aria-label="Borrar mensaje">✕</button>` : ''}</small></div>`).join('') : '<div class="empty"><p>Aún no hay mensajes. ¡Escribe el primero!</p></div>';
+  if (stick) toBottom();
+}
+function chatDot() { const d = $('#chat-dot'); if (!d) return; const n = MSGS.filter(m => m.id > seen && m.author !== ME()).length; d.hidden = !n || inChat(); d.textContent = n > 9 ? '9+' : n; }
+async function loadChat() {
+  try {
+    const rows = (await api('/rest/v1/messages?order=id.desc&select=*&limit=100')).reverse(), sig = r => r.map(x => x.id).join();
+    if (sig(rows) !== sig(MSGS)) { const first = !MSGS.length, near = inChat() && nearBottom(); MSGS = rows; localStorage.setItem('lobby:c:chat', JSON.stringify(MSGS)); drawChat(first || near); }
+  } catch (e) {}
+  if (inChat() && MSGS.length) { seen = MSGS[MSGS.length - 1].id; localStorage.setItem('lobby:seen', seen); }
+  chatDot();
+}
+function chatPoll() { clearInterval(chatTimer); chatTimer = setInterval(() => { if (!document.hidden && S && S.me) loadChat(); }, inChat() ? 3000 : 25000); }
+$('#chat-form').addEventListener('submit', async e => {
+  e.preventDefault(); const t = $('#chat-in').value.trim(); if (!t) return;
+  try { await api('/rest/v1/messages', {m: 'POST', b: {author: ME(), body: t}}); $('#chat-in').value = ''; await loadChat(); toBottom(); } catch (err) { toast('No se pudo enviar (¿sin conexión?)'); }
+});
+$('#chat-list').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return; try { await api('/rest/v1/messages?id=eq.' + b.dataset.id, {m: 'DELETE'}); await loadChat(); } catch (err) { toast('No se pudo borrar'); } });
+drawChat(false);
+
+// ===== Wrapped del grupo =====
+let WP = 'mes', WI = 0, WS = [];
+const WCOL = ['#FFD23F', '#FF5C8A', '#46E0D0', '#8C7BFF', '#FF8A3D', '#FFD23F'];
+const topN = (o, n = 3) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n);
+function drawWrapped() {
+  if (!WS.length) return; const s = WS[WI];
+  $('#wr-card').style.background = WCOL[WI % WCOL.length]; $('#wr-card').innerHTML = `<h3>${s[0]}</h3><div class="big">${s[1]}</div><p>${s[2]}</p>`;
+  $('#wr-dots').innerHTML = WS.map((_, i) => `<i class="${i === WI ? 'on' : ''}"></i>`).join('');
+}
+async function buildWrapped() {
+  const since = WP === 'mes' ? new Date(Date.now() - 30 * 864e5).toISOString() : '1970-01-01T00:00:00Z';
+  let msgs = []; try { msgs = await api('/rest/v1/messages?select=author,created_at&created_at=gte.' + encodeURIComponent(since) + '&limit=1000'); } catch (e) {}
+  const inP = x => x.created_at >= since, nm = n => esc(lab(byName(n)));
+  const posts = ['frases', 'momentos', 'ideas'].flatMap(k => POSTS[k] || []).filter(inP), photos = PHOTOROWS.filter(inP);
+  const cnt = a => a.reduce((o, x) => { const n = x.author || x.created_by; o[n] = (o[n] || 0) + 1; return o; }, {});
+  const tot = p => Object.values(p.reactions || {}).reduce((a, b) => a + b, 0);
+  const star = posts.filter(p => p.kind === 'frases' && tot(p) > 0).sort((a, b) => tot(b) - tot(a))[0];
+  const emo = {}; posts.forEach(p => Object.entries(p.reactions || {}).forEach(([e, n]) => { emo[e] = (emo[e] || 0) + n; }));
+  const rank = o => topN(o).map(([n, c], i) => `${['🥇', '🥈', '🥉'][i]} ${nm(n)} · ${c}`).join('<br>') || 'Nadie todavía', te = topN(emo, 1)[0];
+  WS = [
+    ['Resumen', `${msgs.length} mensajes`, `${posts.filter(p => p.kind === 'frases').length} frases · ${posts.filter(p => p.kind === 'momentos').length} momentos · ${photos.length} fotos`],
+    ['Frase estrella', star ? '“' + esc(star.body) + '”' : 'Aún no hay frase estrella', star ? `— ${nm(star.author)} · ${tot(star)} reacciones` : 'Reacciona a las frases para elegirla'],
+    ['El que más habla', rank(cnt(msgs)), 'mensajes en el chat'],
+    ['El fotógrafo', rank(cnt(photos)), 'fotos subidas'],
+    ['Emoji del grupo', te ? `${te[0]} ×${te[1]}` : '—', 'el más usado en las reacciones'],
+    ['THE LOBBY 5', WP === 'mes' ? 'Vuestros últimos 30 días' : 'Todo lo que habéis vivido', 'Y lo que queda por vivir']
+  ];
+  WI = Math.min(WI, WS.length - 1); drawWrapped();
+}
+$('#wr-card').onclick = e => { const r = e.currentTarget.getBoundingClientRect(); WI = e.clientX < r.left + r.width / 3 ? Math.max(0, WI - 1) : (WI + 1) % WS.length; drawWrapped(); };
+$('#wr-per').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; WP = b.dataset.p; WI = 0; document.querySelectorAll('#wr-per .chip').forEach(c => c.classList.toggle('on', c === b)); buildWrapped(); };
+
+// ===== Notificaciones =====
+const VAPID = window.LOBBY_VAPID || 'BHTPlsZShe5X7deSvolNZwDtqdpDsRClIYNZJv-A8X8yfCNK5knYuev5vViQqqafx9JT-IO1W1eT9YyiMzP2IQI';
+const b64u = s => Uint8Array.from(atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+async function pushRefresh() {
+  const info = $('#push-info'), btn = $('#push-btn');
+  if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) { info.textContent = 'Este navegador no admite notificaciones. En iPhone, instala la app en la pantalla de inicio (iOS 16.4 o más) y ábrela desde el icono.'; btn.hidden = true; return; }
+  if (VAPID.startsWith('PEGA')) { info.textContent = 'Las notificaciones se activarán cuando se configuren las claves del servidor.'; btn.hidden = true; return; }
+  if (Notification.permission === 'denied') { info.textContent = 'Las notificaciones están bloqueadas en los ajustes del móvil.'; btn.hidden = true; return; }
+  try { const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription(); btn.hidden = false;
+    info.textContent = sub ? 'Notificaciones activadas en este móvil.' : 'Recibe avisos de mensajes, fotos, frases, planes y encuestas nuevas.';
+    btn.textContent = sub ? 'Desactivar notificaciones' : 'Activar notificaciones'; btn.dataset.on = sub ? '1' : ''; } catch (e) { btn.hidden = true; }
+}
+$('#push-btn').onclick = async () => {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if ($('#push-btn').dataset.on) { const s = await reg.pushManager.getSubscription(); if (s) { await api('/rest/v1/push_subs?endpoint=eq.' + encodeURIComponent(s.endpoint), {m: 'DELETE'}).catch(() => {}); await s.unsubscribe(); } }
+    else {
+      if (await Notification.requestPermission() !== 'granted') return toast('No se dio permiso');
+      const s = (await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64u(VAPID)})).toJSON();
+      await api('/rest/v1/push_subs?endpoint=eq.' + encodeURIComponent(s.endpoint), {m: 'DELETE'}).catch(() => {});
+      await api('/rest/v1/push_subs', {m: 'POST', b: {endpoint: s.endpoint, member: ME(), p256dh: s.keys.p256dh, auth: s.keys.auth}});
+      toast('Notificaciones activadas');
+    }
+  } catch (err) { toast('No se pudo cambiar las notificaciones'); }
+  pushRefresh();
+};
 
 // ===== Pantalla de entrada =====
 const H = new URLSearchParams(location.hash.slice(1));
@@ -554,10 +692,14 @@ $('#g3').addEventListener('submit', async e => {
 $('#pw-form').addEventListener('submit', async e => { e.preventDefault(); const p = $('#pw-new').value; if (p.length < 8) return toast('Mínimo 8 caracteres'); try { await api('/auth/v1/user', {m: 'PUT', b: {password: p}}); $('#pw-new').value = ''; toast('Contraseña cambiada'); } catch (err) { toast('No se pudo cambiar'); } });
 $('#logout').onclick = logout;
 
-const LOADERS = {frases: () => loadPosts('frases'), momentos: () => loadPosts('momentos'), ideas: () => loadPosts('ideas'), fotos: drawGallery, encuestas: loadPolls, calendario: loadEvs, nosotros: loadMembers};
-const refreshAll = () => Promise.all([loadMembers(), loadPosts('frases'), loadPosts('momentos'), loadPosts('ideas'), loadPolls(), loadEvs(), drawGallery()]).then(renderHome);
-function start() { gate.hidden = true; $('#me-line').textContent = 'Has entrado como ' + S.me + '.'; renderProfiles(); refreshAll(); }
-addEventListener('hashchange', () => { if (!S || !S.me) return; const id = location.hash.slice(1); (LOADERS[id] || (() => Promise.resolve()))().then(() => { if (!id || id === 'inicio') renderHome(); }); });
+const LOADERS = {
+  frases: () => Promise.all([loadPosts('frases'), loadComments()]), momentos: () => Promise.all([loadPosts('momentos'), loadComments()]), ideas: () => loadPosts('ideas'),
+  fotos: drawGallery, encuestas: loadPolls, calendario: () => Promise.all([loadEvs(), loadMembers()]), nosotros: loadMembers,
+  chat: () => loadChat().then(toBottom), wrapped: () => Promise.all([loadPosts('frases'), loadPosts('momentos'), loadPosts('ideas'), drawGallery()]).then(buildWrapped)
+};
+const refreshAll = () => Promise.all([loadMembers(), loadPosts('frases'), loadPosts('momentos'), loadPosts('ideas'), loadComments(), loadPolls(), loadEvs(), drawGallery(), loadChat()]).then(renderHome);
+function start() { gate.hidden = true; $('#me-line').textContent = 'Has entrado como ' + S.me + '.'; renderProfiles(); refreshAll(); pushRefresh(); chatPoll(); }
+addEventListener('hashchange', () => { if (!S || !S.me) return; const id = location.hash.slice(1); chatPoll(); (LOADERS[id] || (() => Promise.resolve()))().then(() => { if (!id || id === 'inicio') renderHome(); }); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S && S.me) refreshAll(); });
 if (REC) { gate.hidden = false; gshow('g3'); } else if (S && S.me) start(); else { gate.hidden = false; gshow('g1'); }
 
