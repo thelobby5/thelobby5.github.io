@@ -167,12 +167,17 @@ html.app #chat.on{min-height:100%}
 #chat-list{flex:1}
 html.app{background:var(--surf)}
 html.app .top{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
+html.app.gap .tabs{background:var(--bg);padding-bottom:6px;border-top:2px solid var(--surf2)}
+html.app.gap[data-theme=light] .tabs{background:var(--surf)}
+.chatform{flex-wrap:wrap}
+#chat-ed{flex-basis:100%;font-weight:800;color:var(--sun);display:flex;align-items:center;gap:8px}
+.ed{font-style:normal;opacity:.9}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6.1</span></header>
+<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6.2</span></header>
 <main>
   <section id="inicio" class="view">
     <div class="hero">
@@ -238,7 +243,7 @@ html.app .top{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
   </section>
 <section id="chat" class="view"><h2>Chat</h2>
     <div id="chat-list" class="chat"></div>
-    <form id="chat-form" class="chatform"><input type="text" class="in" id="chat-in" placeholder="Escribe un mensaje…" maxlength="1000" autocomplete="off"><button class="btn" id="chat-send">Enviar</button></form>
+    <form id="chat-form" class="chatform"><div id="chat-ed" hidden>✎ Editando mensaje <button type="button" class="chip" id="chat-ed-x">Cancelar</button></div><input type="text" class="in" id="chat-in" placeholder="Escribe un mensaje…" maxlength="1000" autocomplete="off"><button class="btn" id="chat-send">Enviar</button></form>
   </section>
   <section id="wrapped" class="view"><h2>Wrapped</h2>
     <div class="tools" id="wr-per"><button class="chip on" data-p="mes">Últimos 30 días</button><button class="chip" data-p="todo">Todo</button></div>
@@ -581,24 +586,34 @@ const inChat = () => location.hash === '#chat';
 const nearBottom = () => { const m = $('main'), d = document.documentElement; return document.documentElement.classList.contains('app') ? m.scrollHeight - m.scrollTop - m.clientHeight < 140 : d.scrollHeight - window.scrollY - innerHeight < 140; };
 const toBottom = () => { const m = $('main'); m.scrollTop = m.scrollHeight; window.scrollTo(0, document.documentElement.scrollHeight); };
 function drawChat(stick) {
-  $('#chat-list').innerHTML = MSGS.length ? MSGS.map(m => `<div class="msg${m.author === ME() ? ' mine' : ''}" style="--c:${byName(m.author).c}"><b>${esc(lab(byName(m.author)))}</b>${esc(m.body)}<small>${new Date(m.created_at).toLocaleTimeString('es-BE', {hour: '2-digit', minute: '2-digit'})}${m.author === ME() ? ` <button data-id="${m.id}" aria-label="Borrar mensaje">✕</button>` : ''}</small></div>`).join('') : '<div class="empty"><p>Aún no hay mensajes. ¡Escribe el primero!</p></div>';
+  $('#chat-list').innerHTML = MSGS.length ? MSGS.map(m => `<div class="msg${m.author === ME() ? ' mine' : ''}" style="--c:${byName(m.author).c}"><b>${esc(lab(byName(m.author)))}</b>${esc(m.body)}<small>${new Date(m.created_at).toLocaleTimeString('es-BE', {hour: '2-digit', minute: '2-digit'})}${m.edited_at ? ' · <i class="ed">editado</i>' : ''}${m.author === ME() ? ` <button data-a="edit" data-id="${m.id}" aria-label="Editar mensaje">✎</button><button data-a="del" data-id="${m.id}" aria-label="Borrar mensaje">✕</button>` : ''}</small></div>`).join('') : '<div class="empty"><p>Aún no hay mensajes. ¡Escribe el primero!</p></div>';
   if (stick) toBottom();
 }
 function chatDot() { const d = $('#chat-dot'); if (!d) return; const n = MSGS.filter(m => m.id > seen && m.author !== ME()).length; d.hidden = !n || inChat(); d.textContent = n > 9 ? '9+' : n; }
 async function loadChat() {
   try {
-    const rows = (await api('/rest/v1/messages?order=id.desc&select=*&limit=100')).reverse(), sig = r => r.map(x => x.id).join();
+    const rows = (await api('/rest/v1/messages?order=id.desc&select=*&limit=100')).reverse(), sig = r => r.map(x => x.id + (x.edited_at || '')).join();
     if (sig(rows) !== sig(MSGS)) { const first = !MSGS.length, near = inChat() && nearBottom(); MSGS = rows; localStorage.setItem('lobby:c:chat', JSON.stringify(MSGS)); drawChat(first || near); }
   } catch (e) {}
   if (inChat() && MSGS.length) { seen = MSGS[MSGS.length - 1].id; localStorage.setItem('lobby:seen', seen); }
   chatDot();
 }
 function chatPoll() { clearInterval(chatTimer); chatTimer = setInterval(() => { if (!document.hidden && S && S.me) loadChat(); }, inChat() ? 3000 : 25000); }
+let chatEdit = 0;
+const chatEditOff = () => { chatEdit = 0; $('#chat-ed').hidden = true; $('#chat-send').textContent = 'Enviar'; $('#chat-in').value = ''; };
+$('#chat-ed-x').onclick = chatEditOff;
 $('#chat-form').addEventListener('submit', async e => {
   e.preventDefault(); const t = $('#chat-in').value.trim(); if (!t) return;
-  try { await api('/rest/v1/messages', {m: 'POST', b: {author: ME(), body: t}}); $('#chat-in').value = ''; await loadChat(); toBottom(); } catch (err) { toast('No se pudo enviar (¿sin conexión?)'); }
+  try {
+    if (chatEdit) { await api('/rest/v1/messages?id=eq.' + chatEdit, {m: 'PATCH', b: {body: t}}); chatEditOff(); toast('Mensaje editado'); await loadChat(); }
+    else { await api('/rest/v1/messages', {m: 'POST', b: {author: ME(), body: t}}); $('#chat-in').value = ''; await loadChat(); toBottom(); }
+  } catch (err) { toast('No se pudo enviar (¿sin conexión?)'); }
 });
-$('#chat-list').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return; try { await api('/rest/v1/messages?id=eq.' + b.dataset.id, {m: 'DELETE'}); await loadChat(); } catch (err) { toast('No se pudo borrar'); } });
+$('#chat-list').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return; const id = +b.dataset.id;
+  if (b.dataset.a === 'edit') { const m = MSGS.find(x => x.id === id); if (!m) return; chatEdit = id; $('#chat-in').value = m.body; $('#chat-ed').hidden = false; $('#chat-send').textContent = 'Guardar'; $('#chat-in').focus(); return; }
+  try { await api('/rest/v1/messages?id=eq.' + id, {m: 'DELETE'}); if (chatEdit === id) chatEditOff(); await loadChat(); } catch (err) { toast('No se pudo borrar'); }
+});
 drawChat(false);
 
 // ===== Wrapped del grupo =====
@@ -706,14 +721,16 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && S 
 if (REC) { gate.hidden = false; gshow('g3'); } else if (S && S.me) start(); else { gate.hidden = false; gshow('g1'); }
 
 // Barra de arriba y de abajo siempre fijas (también con el teclado abierto en iPhone)
+// iPhone instalado: a veces la ventana mide ~47px menos que la pantalla; en ese caso la barra de abajo
+// se pinta del color del hueco para que se vea continua, y los iconos bajan al borde.
+const setGap = () => { if (innerHeight > innerWidth) document.documentElement.classList.toggle('gap', document.documentElement.classList.contains('app') && screen.height - innerHeight >= 30); };
+setGap(); addEventListener('orientationchange', () => setTimeout(setGap, 400));
 if (window.visualViewport && document.documentElement.classList.contains('app')) {
   const vv = visualViewport; let base = vv.height, w = innerWidth;
   const fit = () => {
     if (innerWidth !== w) { w = innerWidth; base = vv.height; }
     if (vv.height > base) base = vv.height;
-    const kb = base - vv.height, open = kb > 100;
-    document.body.style.height = open ? (innerHeight - kb) + 'px' : '';
-    document.body.classList.toggle('kb', open); window.scrollTo(0, 0);
+    document.body.classList.toggle('kb', base - vv.height > 100); window.scrollTo(0, 0);
   };
   vv.addEventListener('resize', fit); vv.addEventListener('scroll', () => window.scrollTo(0, 0));
 }
