@@ -168,7 +168,6 @@ html.app #chat.on{min-height:100%}
 html.app{background:var(--surf)}
 html.app .top{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
 html.app.gap .tabs{background:var(--bg);padding-bottom:6px;border-top:2px solid var(--surf2)}
-html.app.gap[data-theme=light] .tabs{background:var(--surf)}
 .chatform{flex-wrap:wrap}
 #chat-ed{flex-basis:100%;font-weight:800;color:var(--sun);display:flex;align-items:center;gap:8px}
 .ed{font-style:normal;opacity:.9}
@@ -177,7 +176,7 @@ html.app.gap[data-theme=light] .tabs{background:var(--surf)}
 </style>
 </head>
 <body>
-<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6.2</span></header>
+<header class="top"><b>THE LOBBY 5</b><span class="ver">v0.6.3</span></header>
 <main>
   <section id="inicio" class="view">
     <div class="hero">
@@ -726,13 +725,18 @@ if (REC) { gate.hidden = false; gshow('g3'); } else if (S && S.me) start(); else
 const setGap = () => { if (innerHeight > innerWidth) document.documentElement.classList.toggle('gap', document.documentElement.classList.contains('app') && screen.height - innerHeight >= 30); };
 setGap(); addEventListener('orientationchange', () => setTimeout(setGap, 400));
 if (window.visualViewport && document.documentElement.classList.contains('app')) {
-  const vv = visualViewport; let base = vv.height, w = innerWidth;
+  const vv = visualViewport, bd = document.body; let base = vv.height, w = innerWidth, wasKb = false;
   const fit = () => {
     if (innerWidth !== w) { w = innerWidth; base = vv.height; }
     if (vv.height > base) base = vv.height;
-    document.body.classList.toggle('kb', base - vv.height > 100); window.scrollTo(0, 0);
+    const kb = base - vv.height > 100;
+    bd.classList.toggle('kb', kb);
+    bd.style.height = kb ? vv.height + 'px' : '';
+    bd.style.transform = kb && vv.offsetTop > 0 ? `translateY(${Math.round(vv.offsetTop)}px)` : '';
+    if (kb && !wasKb && inChat()) setTimeout(toBottom, 60);
+    wasKb = kb;
   };
-  vv.addEventListener('resize', fit); vv.addEventListener('scroll', () => window.scrollTo(0, 0));
+  vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit);
 }
 
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
